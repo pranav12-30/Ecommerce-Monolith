@@ -1,38 +1,36 @@
-package com.app.ecommerce;
+package com.app.ecommerce.service;
 
+import com.app.ecommerce.model.User;
+import com.app.ecommerce.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
-    List<User> userList = new ArrayList<>();
-    private Long id = 1L;
+    private final UserRepository userRepository;
 
     public List<User> fetchAllUsers() {
-        return userList;
+        return userRepository.findAll();
     }
 
     public void addUser(User user) {
-        user.setId(id++);
-        userList.add(user);
+        userRepository.save(user);
     }
 
     public Optional<User> fetchUser(Long id) {
-        return userList.stream()
-                .filter(user -> user.getId().equals(id))
-                .findFirst();
+        return userRepository.findById(id);
     }
 
     public boolean updateUser(Long id, User updatedUser) {
-        return userList.stream()
-                .filter(user -> user.getId().equals(id))
-                .findFirst()
+        return userRepository.findById(id)
                 .map(user -> {
                     user.setFirstName(updatedUser.getFirstName());
                     user.setLastName(updatedUser.getLastName());
+                    userRepository.save(user);
                     return true;
                 }).orElse(false);
     }
