@@ -12,7 +12,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private Long id = 1L;
 
     public List<User> fetchAllUsers() {
         return userRepository.findAll();
