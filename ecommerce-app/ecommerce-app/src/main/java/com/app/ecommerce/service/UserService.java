@@ -1,5 +1,9 @@
 package com.app.ecommerce.service;
 
+import com.app.ecommerce.dto.AddressDTO;
+import com.app.ecommerce.dto.UserRequest;
+import com.app.ecommerce.dto.UserResponse;
+import com.app.ecommerce.model.Address;
 import com.app.ecommerce.model.User;
 import com.app.ecommerce.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -7,31 +11,78 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
 
-    public List<User> fetchAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponse> fetchAllUsers() {
+        return userRepository.findAll().stream()
+                .map(this::mapToUserResponse)
+                .collect(Collectors.toList());
     }
 
-    public void addUser(User user) {
-        userRepository.save(user);
+    public void addUser(UserRequest userRequest) {
+        userRepository.save(mapToUser(userRequest));
     }
 
-    public Optional<User> fetchUser(Long id) {
-        return userRepository.findById(id);
+    public Optional<UserResponse> fetchUser(Long id) {
+        return userRepository.findById(id)
+                .map(this::mapToUserResponse);
     }
 
-    public boolean updateUser(Long id, User updatedUser) {
+    public boolean updateUser(Long id, UserRequest updatedUserRequest) {
         return userRepository.findById(id)
                 .map(user -> {
-                    user.setFirstName(updatedUser.getFirstName());
-                    user.setLastName(updatedUser.getLastName());
+                    user.setFirstName(updatedUserRequest.getFirstName());
+                    user.setLastName(updatedUserRequest.getLastName());
                     userRepository.save(user);
                     return true;
                 }).orElse(false);
+    }
+
+    private UserResponse mapToUserResponse(User user) {
+        UserResponse.UserResponseBuilder userResponseBuilder = UserResponse.builder()
+                .id(user.getId().toString())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .role(user.getRole());
+
+        Address address = user.getAddress();
+        if (address != null) {
+            AddressDTO addressDTO = AddressDTO.builder()
+                    .state(address.getState())
+                    .city(address.getCity())
+                    .country(address.getCountry())
+                    .zipcode(address.getZipcode())
+                    .street(address.getStreet())
+                    .build();
+            userResponseBuilder.address(addressDTO);
+        }
+        return userResponseBuilder.build();
+    }
+
+    private User mapToUser(UserRequest userRequest) {
+        User.UserBuilder userBuilder = User.builder()
+                .firstName(userRequest.getFirstName())
+                .lastName(userRequest.getLastName())
+                .phone(userRequest.getPhone())
+                .email(userRequest.getEmail());
+        AddressDTO addressDTO = userRequest.getAddress();
+        if (addressDTO != null) {
+            Address address = Address.builder()
+                    .street(addressDTO.getStreet())
+                    .state(addressDTO.getState())
+                    .zipcode(addressDTO.getZipcode())
+                    .country(addressDTO.getCountry())
+                    .city(addressDTO.getCity())
+                    .build();
+            userBuilder.address(address);
+        }
+        return userBuilder.build();
     }
 }
