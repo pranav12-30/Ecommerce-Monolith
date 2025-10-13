@@ -37,6 +37,21 @@ public class ProductService {
                 });
     }
 
+    public boolean deleteProduct(Long id) {
+        return productRepository.findByIdAndActiveTrue(id)
+                .map(product -> {
+                    product.setActive(false);
+                    productRepository.save(product);
+                    return true;
+                }).orElse(false);
+    }
+
+    public List<ProductResponse> searchProducts(String keyword) {
+        return productRepository.searchProducts(keyword).stream()
+                .map(this::mapToProductResponse)
+                .collect(Collectors.toList());
+    }
+
     private ProductResponse mapToProductResponse(Product savedProduct) {
         return ProductResponse.builder()
                 .id(savedProduct.getId())
@@ -68,14 +83,5 @@ public class ProductService {
         product.setCategory(productRequest.getCategory());
         product.setImageUrl(productRequest.getImageUrl());
         product.setStockQuantity(productRequest.getStockQuantity());
-    }
-
-    public boolean deleteProduct(Long id) {
-        return productRepository.findByIdAndActiveTrue(id)
-                .map(product -> {
-                    product.setActive(false);
-                    productRepository.save(product);
-                    return true;
-                }).orElse(false);
     }
 }
