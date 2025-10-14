@@ -14,6 +14,7 @@ public class CartController {
 
     private final CartService cartService;
 
+    // allows users to add item to cart.
     @PostMapping
     public ResponseEntity<String> addToCart(@RequestBody CartItemRequest cartItemRequest,
                                             @RequestHeader("user-id") String userId) {
@@ -21,6 +22,6 @@ public class CartController {
         if (!addedToCart) {
             return ResponseEntity.badRequest().body("Product not found or Product Out Of Stock or User not found");
         }
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return new ResponseEntity<>("Item added to cart successfully by the user.", HttpStatus.CREATED);
     }
 }
