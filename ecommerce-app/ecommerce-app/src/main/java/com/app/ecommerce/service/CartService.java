@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +51,21 @@ public class CartService {
                     .build();
             cartItemRepository.save(cartItem);
         }
+        return true;
+    }
+
+    public boolean deleteItemFromCart(String userId, Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElse(null);
+        User user = userRepository.findById(Long.valueOf(userId))
+                .orElse(null);
+        if (isNull(product) || isNull(user)) {
+            return false;
+        }
+
+        CartItem cartItem = cartItemRepository.findByUserAndProduct(user, product);
+        if (isNull(cartItem)) return false;
+        cartItemRepository.deleteById(cartItem.getId());
         return true;
     }
 }
