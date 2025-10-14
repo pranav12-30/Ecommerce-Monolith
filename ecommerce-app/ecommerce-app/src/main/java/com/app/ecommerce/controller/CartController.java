@@ -1,11 +1,14 @@
 package com.app.ecommerce.controller;
 
 import com.app.ecommerce.dto.CartItemRequest;
+import com.app.ecommerce.model.CartItem;
 import com.app.ecommerce.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/cart")
@@ -31,5 +34,11 @@ public class CartController {
                                                @PathVariable Long productId) {
         boolean isDeleted = cartService.deleteItemFromCart(userId, productId);
         return isDeleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+    // get all items in cart
+    @GetMapping
+    public ResponseEntity<List<CartItem>> getCart(@RequestHeader("user-id") String userId) {
+        return ResponseEntity.ok(cartService.getCart(userId));
     }
 }
