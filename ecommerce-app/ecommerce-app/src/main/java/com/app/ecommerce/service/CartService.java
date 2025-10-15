@@ -7,6 +7,7 @@ import com.app.ecommerce.model.User;
 import com.app.ecommerce.repository.CartItemRepository;
 import com.app.ecommerce.repository.ProductRepository;
 import com.app.ecommerce.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,10 +15,10 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CartService {
 
     private final UserRepository userRepository;
@@ -74,5 +75,10 @@ public class CartService {
         return userRepository.findById(Long.valueOf(userId))
                 .map(cartItemRepository::findByUser)
                 .orElseGet(List::of);
+    }
+
+    public void clearCart(String userId) {
+        userRepository.findById(Long.valueOf(userId))
+                .ifPresent(cartItemRepository::deleteByUser);
     }
 }
